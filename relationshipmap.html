@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<!-- saved from url=(0254)https://share.qichacha.com/lite-app-resources/html/uni-html/character-relation.html?url_pre=https://xcx.qcc.com/mp-weixin/forwardApp&rlid=9cce0780ab7644008b73bc2120479d31&accessToken=81cce221029f94e8f05ba8d098bfb493&isIPhoneX=false&v=0.6611048602873472 -->
+<html lang="zh">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1.0, user-scalable=0">
+    <title>关系图谱</title>
+    <script type="text/javascript" src="./js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="./js/d3.v4.js"></script>
+    <script src="./js/cytoscape.min.js"></script>
+    <script src="./js/2.2.43.webviewbridge.min.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            -webkit-user-select: none;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        #loading {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            bottom: 0;
+            background: #ffffff;
+            z-index: 1000;
+        }
+
+        #cy {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            background: url("./img/watermark-new.png") repeat;
+            background-size: 200px;
+        }
+
+        .title {
+            width: 100%;
+            overflow: hidden;
+            padding: 10px 10px;
+            position: absolute;
+            top: 0;
+            display: none;
+            font-size: 15px;
+            background: #fff;
+            color: #999999;
+        }
+
+        .title::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-bottom: 1px solid #eeeeee;
+            transform: scaleY(0.5);
+            transform-origin: 0 100%;
+        }
+
+        .title-tip {
+            float: left;
+        }
+
+        #title-text {
+            color: #333;
+            margin-left: 70px;
+            margin-right: 56px;
+        }
+
+        #detail {
+            color: #0178FF;
+            position: absolute;
+            right: 10px;
+            top: 9px;
+            background: url("./img/right-arrow.png") no-repeat right 0 center;
+            background-size: 9px;
+            padding-right: 15px;
+        }
+
+        .bottom {
+            background: #ffffff;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 5px 10px 5px 10px;
+            font-size: 11px;
+            color: #999;
+            display: none;
+        }
+
+        .bottom img {
+            height: 12px;
+            margin: 0 5px;
+        }
+
+        .button-wrap {
+            position: absolute;
+            left: 0;
+            bottom: 80px;
+            width: 100%;
+            display: none;
+        }
+
+        .button-wrap-1 {
+            position: absolute;
+            left: 0;
+            bottom: 30px;
+            width: 100%;
+        }
+
+        #ent {
+            width: 60px;
+            position: absolute;
+            left: 10px;
+            top: 0;
+            font-size: 11px;
+            font-family: PingFangSC-Regular;
+            color: #333;
+        }
+
+        #ent-circle {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #67aef5;
+            margin-right: 5px;
+        }
+
+        #stock {
+            width: 60px;
+            position: absolute;
+            left: 60px;
+            top: 0;
+            font-size: 11px;
+            font-family: PingFangSC-Regular;
+            color: #333;
+        }
+
+        #stock-circle {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f09b62;
+            margin-right: 5px;
+        }
+
+        #person {
+            width: 60px;
+            position: absolute;
+            left: 130px;
+            top: 0;
+            font-size: 11px;
+            font-family: PingFangSC-Regular;
+            color: #333;
+        }
+
+        #person-circle {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ff6759;
+            margin-right: 5px;
+        }
+
+        #invest {
+            width: 60px;
+            position: absolute;
+            left: 10px;
+            top: 20px;
+            font-size: 11px;
+            font-family: PingFangSC-Regular;
+            color: #333;
+            background: url("./img/invest-arrow.png") no-repeat left 0 center;
+            background-size: 15px;
+            padding-left: 20px;
+        }
+
+        #employ {
+            width: 60px;
+            position: absolute;
+            left: 65px;
+            top: 20px;
+            font-size: 11px;
+            font-family: PingFangSC-Regular;
+            color: #333;
+            background: url("./img/employ-arrow.png") no-repeat left 0 center;
+            background-size: 15px;
+            padding-left: 20px;
+        }
+
+        #refresh {
+            position: absolute;
+            left: 10px;
+            bottom: 43px;
+            background-image: url("./img/refresh.png");
+            background-repeat: no-repeat;
+            background-size: 15px 15px;
+            background-position: 10px 50%;
+            padding: 5px 10px 5px 30px;
+            border-radius: 3px;
+            border: 1px solid #eee;
+            color: #2c7ce8;
+            font-size: 13px;
+            ;
+            background-color: #fff;
+        }
+
+        #full-screen {
+            position: absolute;
+            left: 10px;
+            bottom: 0px;
+            background-image: url("./img/exit.png");
+            background-repeat: no-repeat;
+            background-size: 15px 15px;
+            background-position: 10px 50%;
+            padding: 5px 10px 5px 30px;
+            border-radius: 3px;
+            border: 1px solid #eee;
+            color: #2c7ce8;
+            font-size: 13px;
+            ;
+            background-color: #fff;
+        }
+
+        #save-img {
+            position: absolute;
+            right: 10px;
+            bottom: 86px;
+            background-image: url("./img/save-img.png");
+            background-repeat: no-repeat;
+            background-size: 15px 15px;
+            background-position: 10px 50%;
+            padding: 5px 10px 5px 30px;
+            border-radius: 3px;
+            border: 1px solid #eee;
+            background-color: #fff;
+            color: #2c7ce8;
+            font-size: 13px;
+            ;
+        }
+
+        #save-img img {
+            width: 15px;
+        }
+
+        @media only screen and (min-width: 800px) {
+            .button-wrap-1 {
+                position: absolute;
+                left: 34px;
+                bottom: 30px;
+                width: 100%;
+            }
+        }
+
+        @media only screen and (min-height: 800px) {
+            .button-wrap-1 {
+                position: absolute;
+                left: 0;
+                left: 34px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading">
+        <div style="text-align: center;margin-top: 20%;">
+            <img src="./img/report_loading-new.gif" style="width: 204px;">
+        </div>
+    </div>
+    <div id="non-info"
+        style="display: none;position:absolute;z-index: 10;margin-top:15%;text-align: center;left: 50%;transform: translate(-50%, 0);-webkit-transform: translate(-50%, 0);">
+        <img class="no-data-img" src="./img/no-data-new.png" style="width:100px;height:100px;margin-bottom:30px">
+        <div class="no-data-text" style="color: #999;font-size: 15px;text-align: center;">暂时没有找到相关数据</div>
+    </div>
+    <div id="cy"></div>
+    <div class="title">
+        <div class="title-tip">当前节点：</div>
+        <div id="title-text"></div>
+        <div id="detail">详情</div>
+    </div>
+    <div class="button-wrap">
+        <div id="ent"><span id="ent-circle"></span>企业</div>
+        <div id="stock"><span id="stock-circle"></span>当前节点</div>
+        <div id="person"><span id="person-circle"></span>自然人</div>
+        <div id="invest">投资</div>
+        <div id="employ">任职</div>
+    </div>
+    <div class="button-wrap-1">
+        <div id="refresh">刷新</div>
+        <div id="full-screen">退出</div>
+    </div>
+    <div class="bottom">*以上数据是<img src="./img/bottom-logo.png">大数据分析引擎基于公开信息挖掘的成果，仅供参考。该成果不构成任何明示或暗示的观点或保证。</div>
+    <div id="screen-shot" style="display: none;"></div>
+    <div id="screen-shot-1" style="display: none;"></div>
+    <div id="company-response" style="display:none"></div>
+    <div id="person-response" style="display:none"></div>
+    <div id="hide-response" style="display:none"></div>
+
+    <script>
+
+        (function (window, $, undefined) {
+
+            var rootData = [];
+            var cy;
+            var centerElementId;
+            var iosBase;
+            var id = getQueryString("rlid");
+            var access_token = getQueryString("access_token");
+            var salt = getQueryString("salt");
+            var platfrom = "";
+
+            var zoom = 1.0000095043745896;
+
+            var width = $("#cy").width();
+            var height = $("#cy").height();
+
+            var androidScreen = true;
+
+            var pageLength = 2048;
+
+            var nodeNum = 0;
+            if (getQueryString('back') === '0') {
+                $('#full-screen').hide();
+            }
+            $(document).ready(function () {
+                init();
+            });
+            function init() {
+                var os = identifyOs();
+
+                if (os.isAndroid) {
+                    getData();
+                }
+                if (os.isIOS) {
+                    bindData();
+                    $("#save-img").on("click", function () {
+                        getImageV2();
+                    });
+                }
+                buttonClick();
+            }
+
+
+            function bindData() {
+                getData();
+            }
+
+            function getData() {
+                var url = `https://api.shujg.com/graph/${id}/2`;
+                // var url = `https://api.shung.com/graph/2ff24d7cb0d894649584f304e074cc65/2`;
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: {
+                        "Authorization": "Bearer" + " " + access_token,
+                        "salt": salt
+                    },
+                    dataType: 'JSON',
+                    success: function (data) {
+                        $("#hide-response").trigger("click");
+                        setData(data.data);
+                    }
+                });
+            }
+
+            function setData(data) {
+                if (typeof data == 'string') {
+                    data = JSON.parse(data);
+                }
+                var nodes = [];
+                var links = [];
+                console.log(data,'媕娿科技');
+                if (!data||!data.nodes.length) {
+                    $("#loading").css("display", "none");
+                    $("#non-info").css("display", "block");
+                    return;
+                }
+
+                // for (var i = 0; i < data.length; i++) {
+                //     nodes = nodes.concat(data[i].nodes);
+                //     links = links.concat(data[i].relationships);
+                // }
+                nodes = data.nodes
+                links = data.relationships
+                nodeNum = nodes.length;
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].index = i;
+                    if (nodes[i].properties.label == "Company") {
+                        nodes[i].bgColor = "#4099ff";
+                        nodes[i].borderColor = "#0178ff";
+                        nodes[i].size = 60;
+                        nodes[i].type = 'company';
+                    }
+
+                    if (nodes[i].properties.label == "Person") {
+                        nodes[i].bgColor = "#ff6759";
+                        nodes[i].borderColor = "#ff6759";
+                        nodes[i].size = 45;
+
+                        nodes[i].type = 'person';
+                        if (nodes[i].properties.hasImage == true) {
+                            nodes[i].size = 60;
+                        } else {
+                            nodes[i].size = 45;
+                        }
+                    }
+
+                    if (nodes[i].properties.rlid == id) {
+                        nodes[i].bgColor = "#ffba40";
+                        nodes[i].borderColor = "#ffab1a";
+                        centerElementId = nodes[i].id;
+                    }
+
+                    rootData.push({
+                        data: nodes[i]
+                    });
+                }
+
+                for (var i = 0; i < links.length; i++) {
+                    links[i].source = links[i].startNode;
+                    links[i].target = links[i].endNode;
+
+                    if (links[i].properties.type == "MANAGER") {
+                        links[i].color = "#4099ff";
+                        links[i].properties.role = links[i].properties.role || "任职";
+                        links[i].source = links[i].startNode;
+                        links[i].target = links[i].endNode;
+                    }
+
+                    if (links[i].properties.type == "SHAREHOLDER") {
+                        links[i].color = "#ff6759";
+                        links[i].properties.role = "投资";
+                    }
+
+                    if (links[i].properties.type == "LEGAL") {
+                        links[i].color = "#4099ff";
+                        links[i].properties.role = links[i].properties.role || "法定代表人";
+                    }
+
+                    rootData.push({
+                        data: {
+                            source: links[i].source,
+                            target: links[i].target,
+                            label: links[i].properties.role,
+                            color: links[i].color
+                        },
+                        classes: 'autorotate'
+                    });
+                }
+
+                // 计算围绕节点最多的数量
+                var nodeChildMaxNum = 0;
+                for (var i = 0; i < nodes.length; i++) {
+                    var sum = 0;
+                    for (var j = 0; j < links.length; j++) {
+                        if (links[j].source == nodes[i].id || links[j].target == nodes[i].id) {
+                            sum++;
+                        }
+                    }
+
+                    if (nodeChildMaxNum < sum) {
+                        nodeChildMaxNum = sum;
+                    }
+                }
+
+                var strength = -600, distanceMax = 330, theta = 0, distance = 130, colideRadius = 35, distanceMin = 400;
+                // 根据节点数量调节
+                if (nodes.length < 50) {
+                    strength = -800;
+                    distanceMax = 400;
+                } else if (nodes.length > 50 && nodes.length < 100) {
+                    zoom = 0.4;
+                    strength = -800; distanceMax = 350; distance = 130; colideRadius = 35;
+                } else if (nodes.length > 100 && nodes.length < 150) {
+                    zoom = 0.3;
+                    strength = -900; distanceMax = 450;
+                } else if (nodes.length > 150 && nodes.length < 200) {
+                    zoom = 0.2;
+                    strength = -1000; distanceMax = 500;
+                } else if (nodes.length > 200) {
+                    zoom = 0.2;
+                    strength = -1600; distanceMax = 500; theta = 0.6, distance = 100, colideRadius = 35;
+                }
+
+                // 根据围绕数量调节
+                if (nodeChildMaxNum > 50 && nodeChildMaxNum < 100) {
+                    strength = -2000; distanceMax = 500;
+                } else if (nodeChildMaxNum > 1000 && nodeChildMaxNum < 2000) {
+                    strength = -4000; distanceMax = 1500;
+                }
+
+                // 计算节点位置
+                d3.forceSimulation(nodes)
+                    .force('charge', d3.forceManyBody().strength(strength).distanceMax(distanceMax).theta(theta))
+                    .force('link', d3.forceLink(links).distance(distance).id(function (d) {
+                        return d.id;
+                    }))
+                    .force('center', d3.forceCenter(width / 2, height / 2))
+                    .force('collide', d3.forceCollide().radius(function () { return colideRadius; }));
+
+                setTimeout(function () {
+                    // 设置节点背景和border颜色
+                    $("#loading").css("display", "none");
+                    drawGraph(rootData);
+                }, 500)
+
+            }
+
+
+            function drawGraph(data) {
+                for (var i = 0; i < data.length; i++) {
+                    data[i].position = {
+                        x: data[i].data.x,
+                        y: data[i].data.y
+                    };
+                }
+                cy = cytoscape({
+                    container: document.getElementById('cy'),
+                    motionBlur: false,
+                    textureOnViewport: false,
+                    wheelSensitivity: 0.1,
+                    minZoom: 0.1,
+                    maxZoom: 2.5,
+                    style: [
+                        {
+                            selector: 'node',
+                            style: {
+                                shape: 'ellipse',
+                                width: function (ele) {
+                                    return ele.data("size");
+                                },
+                                height: function (ele) {
+                                    return ele.data("size");
+                                },
+                                'background-color': function (ele) {
+                                    return ele.data("bgColor");
+                                },
+                                'border-color': function (ele) {
+                                    return ele.data("borderColor");
+                                },
+                                'background-image': function (ele) {
+                                    if (ele.data("properties").imgURL && ele.data("type") == 'person') {
+                                        return ele.data("properties").imgURL;
+                                    }
+                                    return "none";
+                                },
+                                'background-fit': "cover",
+                                'border-width': 1,
+                                'border-opacity': 1,
+                                label: function (ele) {
+                                    var label = ele.data("properties").name;
+                                    label = label.replace(/(.{5})(?=.)/g, '$1\n');
+                                    return label;
+                                },
+                                color: "#fff",
+                                'font-size': 10,
+                                'text-wrap': 'wrap',
+                                'text-max-width': 60,
+                                'text-halign': 'center',
+                                'text-valign': 'center',
+                                'text-margin-y': function (ele) {
+                                    if (ele.data("properties").hasImage == true && ele.data("type") == 'person') {
+                                        return 20;
+                                    }
+                                    return 0;
+                                },
+                                'text-background-color': '#000',
+                                'text-background-shape': 'roundrectangle',
+                                'text-background-opacity': function (ele) {
+                                    if (ele.data("properties").hasImage == true && ele.data("type") == 'person') {
+                                        return 0.3;
+                                    } else {
+                                        return 0
+                                    }
+                                },
+                                'overlay-color': '#fff',
+                                'overlay-opacity': 0
+                            }
+                        },
+                        {
+                            selector: 'edge',
+                            style: {
+                                'curve-style': 'bezier',
+                                'control-point-step-size': 20,
+                                'target-arrow-shape': 'triangle-backcurve',
+                                'target-arrow-color': function (ele) {
+                                    return ele.data("color");
+                                },
+                                'arrow-scale': 0.5,
+                                'line-color': function (ele) {
+                                    return ele.data("color");
+                                },
+                                'font-size': 10,
+                                'background-color': function (ele) {
+                                    return ele.data("color");
+                                },
+                                label: function (ele) {
+                                    return ele.data("label");
+                                },
+                                'text-opacity': 0.8,
+                                'text-background-color': '#fff',
+                                'text-background-opacity': 1,
+                                'width': 0.3,
+                                'overlay-color': '#fff',
+                                'overlay-opacity': 0
+                            }
+                        },
+                        {
+                            "selector": ".autorotate",
+                            "style": {
+                                "edge-text-rotation": "autorotate"
+                            }
+                        },
+                        {
+                            selector: '.nodeActive',
+                            style: {
+                                'border-width': 10,
+                                'border-opacity': 0.5,
+                                'z-index': 1
+                            }
+                        },
+                        {
+                            selector: '.edgeActive',
+                            style: {
+                                'width': 0.5,
+                                'z-index': 1
+                            }
+                        },
+                        {
+                            selector: '.opacity',
+                            style: {
+                                opacity: 0.2
+                            }
+                        }
+                    ],
+                    layout: {
+                        name: 'preset',
+                        fit: true,
+                        positions: {
+                            x: 0,
+                            y: 0
+                        },
+                        componentSpacing: 40,
+                        nestingFactor: 12,
+                        padding: 80,
+                        edgeElasticity: 800,
+                        zoom: zoom
+                    },
+                    elements: data,
+                });
+
+                cy.ready(function () {
+                    cy.center();
+                });
+
+                cy.on('tap', 'node', function (evt) {
+                    var node = evt.target;
+
+                    if (node.data("properties").rlid) {
+                        $("#detail").css("display", "block");
+                    } else {
+                        $("#detail").css("display", "none");
+                    }
+                    cy.collection("node").removeClass("nodeActive");
+                    node.addClass("nodeActive");
+                    cy.collection("node").addClass("opacity");
+                    cy.collection("edge").addClass("opacity");
+
+                    node.neighborhood("edge").removeClass("opacity");
+                    node.neighborhood("edge").addClass("edgeActive");
+                    node.neighborhood("edge").connectedNodes().removeClass("opacity");
+
+                    $("#title-text").text(node.data("properties").name);
+                    $(".title").css("display", "block");
+
+                    $("#detail").attr("rlid", node.data("properties").rlid);
+                    $("#detail").attr("label", node.data("properties").label);
+                    $("#detail").attr("name", node.data("properties").name);
+                });
+
+                cy.on('tap', function (event) {
+                    var evtTarget = event.target;
+
+                    if (evtTarget === cy) {
+                        cy.collection("node").removeClass("nodeActive");
+                        cy.collection("edge").removeClass("edgeActive");
+                        cy.collection("node").removeClass("opacity");
+                        cy.collection("edge").removeClass("opacity");
+                        $(".title").css("display", "none");
+                    } else {
+                    }
+                });
+            }
+
+            function buttonClick() {
+                $("#refresh").on("click", function () {
+                    drawGraph(rootData);
+                    $(".title").css("display", "none");
+                    cy.collection("node").removeClass("nodeActive");
+                    cy.collection("node").removeClass("opacity");
+                    cy.collection("edge").removeClass("opacity");
+                    cy.collection("edge").removeClass("edgeActive");
+                });
+                $("#refresh").on("touchstart", function () {
+                    $(this).css("background-color", "#eeeeee");
+                });
+                $("#refresh").on("touchend", function () {
+                    $(this).css("background-color", "#ffffff");
+                });
+
+
+                $("#full-screen").on("click", function () {
+                    mpx.navigateBack({
+                        delta: 1
+                    })
+                });
+                $("#full-screen").on("touchstart", function () {
+                    $(this).css("background-color", "#eeeeee");
+                });
+                $("#full-screen").on("touchend", function () {
+                    $(this).css("background-color", "#ffffff");
+                });
+                // xiugai
+                $("#detail").on("click", function () {
+                    var rlid = $(this).attr("rlid");
+                    var name = $(this).attr("name");
+                    var label = $(this).attr("label");
+                    if (label == 'Person') {
+                        mpx.navigateTo({
+                            url: '/packageBoss/pages/bossdetail/bossdetail?id=' + rlid
+                        })
+
+                    } else {
+                        mpx.navigateTo({
+                            url: '/pages/detail/companydetail?id=' + rlid
+                        })
+
+
+                    }
+                });
+            }
+
+            // 判断系统
+            function identifyOs() {
+                var u = navigator.userAgent;
+                var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+                var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+
+                return {
+                    isAndroid: isAndroid,
+                    isIOS: isIOS
+                };
+            }
+
+            // 获取url中的参数
+            function getQueryString(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) return decodeURIComponent(r[2]); return null;
+            }
+
+            function getImageV2() {
+
+                var jpg64 = cy.png({
+                    full: true,
+                    quality: 0.8,
+                    maxWidth: 1500,
+                    bg: 'rgba(255,255,255,0)'
+                });
+                canvasImg(jpg64);
+
+            }
+
+            function canvasImg(imgData) {
+                var img = new Image();
+                img.src = imgData;
+                img.onload = function (e) {
+                    var canvas = document.createElement('canvas');  //准备空画布
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    var context = canvas.getContext('2d');  //取得画布的2d绘图上下文
+                    context.fillStyle = "#fff";
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+
+                    if (canvas.width > 400) {
+                        var marker = '关联图谱由企查查基于公开信息利用大数据分析引擎独家生成';
+                        context.font = "14px 微软雅黑";
+                        context.fillStyle = "#aaaaaa";
+                        context.fillText(marker, canvas.width / 2 - context.measureText(marker).width / 2, canvas.height - 30);
+                    }
+
+                    for (var i = 0; i < canvas.width + 100; i += 200) {
+                        for (var j = 0; j < canvas.height + 1000; j += 156) {
+                            var shuiying = new Image();
+                            shuiying.src = "./img/watermark-new.png";
+                            context.drawImage(shuiying, i, j, 200, 156);
+                        }
+                    }
+
+                    context.drawImage(img, 0, 0);
+
+                    iosBase = canvas.toDataURL('image/jpeg');
+                    if (identifyOs().isAndroid) {
+                        androidForJS.saveMapPictureCallback(Math.ceil(iosBase.length / pageLength));
+                    } else {
+                        $("#screen-shot-1").trigger("click");
+                    }
+                }
+            }
+
+            function getImgByIndex(index) {
+                return iosBase.substr(index * pageLength, pageLength);
+            }
+
+            function setScreenEnable() {
+                androidScreen = true;
+            }
+
+            window.getImageV2 = getImageV2;
+            window.setData = setData;
+            window.getImgByIndex = getImgByIndex;
+            window.setScreenEnable = setScreenEnable;
+
+        })(window, jQuery);
+    </script>
+
+</body>
+
+</html>
