@@ -364,9 +364,7 @@
             }
 
             function getData() {
-                var url = `https://api.shujg.com/graph/${id}/2`;
-                // var url = `https://api.shung.com/graph/2ff24d7cb0d894649584f304e074cc65/2`;
-
+                var url = `https://就不告诉你接口/${id}/2`;
                 $.ajax({
                     url: url,
                     type: 'GET',
@@ -388,7 +386,6 @@
                 }
                 var nodes = [];
                 var links = [];
-                console.log(data,'媕娿科技');
                 if (!data||!data.nodes.length) {
                     $("#loading").css("display", "none");
                     $("#non-info").css("display", "block");
